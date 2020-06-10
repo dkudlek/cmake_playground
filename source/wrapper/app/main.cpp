@@ -1,6 +1,6 @@
 #include <iostream>
 
-#include "foo1.h"
+#include "test_lib/foo1.h"
 
 
 int main(){
