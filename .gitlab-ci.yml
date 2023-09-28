@@ -1,60 +1,46 @@
-image: gcc
-stages:
-  - configure
-  - build
-#  - test
-#  - deploy
+image: dkudlek/gcc13.2.0-gtest14.4.0
 
+build:debug:
+  stage: build
+  before_script:
+    - export PATH="/usr/local/lib/cmake/GTest:$PATH"
+  script:
+    - mkdir build
+    - cd build
+    - cmake .. -DCMAKE_INSTALL_PREFIX=../install
+    - cmake --build . --config Debug --target install
+  artifacts:
+    paths:
+      - build
 
-ci_example_configure:WSL:
- stage: configure
- before_script:
-  - apt-get update --yes
-  - apt-get install --yes cmake
- script:
-  - echo configure stage
-  - mkdir build
-  - cd build
-  - cmake ..
- artifacts:
-  paths:
-   - build
+build:release:
+  stage: build
+  before_script:
+    - export PATH="/usr/local/lib/cmake/GTest:$PATH"
+  script:
+    - mkdir build
+    - cd build
+    - cmake .. -DCMAKE_INSTALL_PREFIX=../install
+    - cmake --build . --config Release --target install
+  artifacts:
+    paths:
+      - build
 
-ci_example_build:WSL:
- stage: build
- before_script:
-  - apt-get update --yes
-  - apt-get install --yes cmake
- script:
-  - echo build stage
-  - cd build
-  - cmake --build .
- artifacts:
-  paths:
-   - build
- dependencies:
-  - ci_example_configure:WSL
-
-#ci_example_test:WSL:
-# stage: test
-# tags:
-#  - wsl
-# script:
-#  - cd build
-#  - wsl ctest . -C Debug
-# dependencies:
-#  - ci_example_build:WSL
-
-
-## Common deploy
-#ci_example_deploy:
-# stage: deploy
-# tags:
-#  - windows
-#  - wsl
-# script:
-#  - echo deploy
-# dependencies: []
-# artifacts:
-#  paths:
-#   - src/lib.hpp
+test:
+  stage: test
+  dependencies:
+    - "build:release"
+    - "build:debug"
+  script:
+    - cd build
+    - ctest -C Release --verbose  --output-junit result_release.xml
+    - ctest -C Debug --verbose  --output-junit result_debug.xml
+  artifacts:
+    when: always
+    paths:
+      - build/result_release.xml
+      - build/result_debug.xml
+    reports:
+      junit:
+        - build/result_release.xml
+        - build/result_debug.xml

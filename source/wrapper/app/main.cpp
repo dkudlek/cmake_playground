@@ -1,14 +1,28 @@
 #include <iostream>
 
-#include "test_lib/foo1.h"
+#include "state_machine/state_machine.h"
 
+namespace tb = testbed;
 
-int main(){
-    StateMachine machine = StateMachine();
-    std::cout << machine.getState() << std::endl;
-    machine.nextState();
-    std::cout << machine.getState() << std::endl;
-    machine.nextState();
-    std::cout << machine.getState() << std::endl;
-    machine.nextState();
+std::string print(tb::State state) {
+  if (tb::State::inactive == state) {
+    return "inactive";
+  } else if (tb::State::ready == state) {
+    return "ready";
+  } else if (tb::State::active == state) {
+    return "active";
+  }
+  if (tb::State::error == state) {
+    return "error";
+  }
+  return "NOP";
+}
+
+int main() {
+  tb::StateMachine machine = tb::StateMachine();
+  std::cout << print(machine.getState()) << std::endl;
+  machine.setEngineState(true);
+  std::cout << print(machine.getState()) << std::endl;
+  machine.setActuationState(true);
+  std::cout << print(machine.getState()) << std::endl;
 }

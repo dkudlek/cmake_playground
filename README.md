@@ -2,6 +2,43 @@ Cmake Playground
 ====
 [TOC]
 
+# TL:DR
+
+Setup googletest 
+
+```sh
+git clone https://github.com/google/googletest.git -b v1.14.0
+cd googletest        # Main directory of the cloned repository.
+mkdir build          # Create a directory to hold the build output.
+cd build 
+#IF WIN
+cmake .. -DCMAKE_INSTALL_PREFIX=../install -Dgtest_force_shared_crt=1  # Set install folder to PROJECT_ROOT/install
+#ELSE
+cmake .. -DCMAKE_INSTALL_PREFIX=../install 
+#ENDIF
+cmake --build . --config Release --target install  # Build release and trigger install procedure
+cd ..
+```
+
+Setup cmake_playground
+```sh 
+mkdir build          # Create a directory to hold the build output.
+cd build
+cmake .. -DCMAKE_INSTALL_PREFIX=../install # Set install folder to PROJECT_ROOT/install
+cmake --build . --config Release --target install  # Build release and trigger install procedure
+ctest -C Release --verbose
+```
+
+```sh
+# setup docker in gitlab runner on synolog
+cd /tmp
+mkdir docker
+cd docker
+curl https://hub.docker.com/r/bebuch/gcc-gtest/dockerfile > Dockerfile
+sudo docker build -t bebuch/gcc-gtest .
+```
+
+
 # Overview
 
 ```puml

@@ -1,2 +1,2 @@
-add_subdirectory(test_lib)
+add_subdirectory(state_machine)
 add_subdirectory(wrapper)
