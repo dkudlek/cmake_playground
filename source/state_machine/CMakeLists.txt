@@ -1,24 +1,25 @@
-add_library(state_machine STATIC state_machine.h state_machine.cpp)
+add_library(state_machine state_machine.h state_machine.cpp)
+add_library(${PROJECT_NAME}::state_machine ALIAS state_machine)
 
-set_target_properties(state_machine PROPERTIES PUBLIC_HEADER "state_machine.h")
+target_include_directories(state_machine
+                           INTERFACE 
+                           $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
+                           $<INSTALL_INTERFACE:include>
+                           )
+target_link_libraries(state_machine PUBLIC testbed_compiler_flags)
 
-export(TARGETS state_machine
-       FILE "${PROJECT_BINARY_DIR}/${CMAKE_PROJECT_NAME}.cmake")
+if(${BUILD_SHARED_LIBS})
+  target_compile_definitions(state_machine PRIVATE "EXPORTING_STATE_MACHINE")
+  target_compile_definitions(state_machine PRIVATE "BUILD_SHARED")
+endif()
 
-export(TARGETS state_machine
-  FILE "${PROJECT_BINARY_DIR}/CMakeTestBedTargets.cmake")
+get_target_property(MAIN_CFLAGS state_machine COMPILE_DEFINITIONS)
+message("-- Target compiler flags are: ${MAIN_CFLAGS}")
 
 install(
-  TARGETS state_machine
-  # IMPORTANT: Add the state_machine library to the "export-set"
-  EXPORT CMakeTestBedTargets
-  ARCHIVE DESTINATION "${INSTALL_LIB_DIR}"
-  RUNTIME DESTINATION "${INSTALL_BIN_DIR}" COMPONENT bin
-  LIBRARY DESTINATION "${INSTALL_LIB_DIR}" COMPONENT shlib
-  PUBLIC_HEADER DESTINATION "${INSTALL_INCLUDE_DIR}/state_machine"
-                COMPONENT dev)
-
-message("INSTALL_INCLUDE_DIR ${INSTALL_INCLUDE_DIR}")
-
+  TARGETS state_machine testbed_compiler_flags
+  EXPORT state_machine_targets
+  DESTINATION lib)
+install(FILES state_machine.h DESTINATION include)
 
 add_subdirectory(tests)

@@ -25,6 +25,7 @@ Setup cmake_playground
 mkdir build          # Create a directory to hold the build output.
 cd build
 cmake .. -DCMAKE_INSTALL_PREFIX=../install # Set install folder to PROJECT_ROOT/install
+(cmake .. -DCMAKE_INSTALL_PREFIX=../install -DBUILD_SHARED_LIBS=ON) # Shared lib
 cmake --build . --config Release --target install  # Build release and trigger install procedure
 ctest -C Release --verbose
 ```

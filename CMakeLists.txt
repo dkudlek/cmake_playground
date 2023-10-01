@@ -1,62 +1,49 @@
-cmake_minimum_required(VERSION 3.4 FATAL_ERROR)
-project(CMakeTestBed LANGUAGES CXX)
+cmake_minimum_required(VERSION 3.15 FATAL_ERROR)
+project(cmake_test_bed LANGUAGES CXX)
 
-set(CMAKETESTBED_MAJOR_VERSION 0)
-set(CMAKETESTBED_MINOR_VERSION 1)
-set(CMAKETESTBED_PATCH_VERSION 0)
+set(CMAKETESTBED_VERSION_MAJOR 0)
+set(CMAKETESTBED_VERSION_MINOR 1)
+set(CMAKETESTBED_VERSION_PATCH 0)
 set(CMAKETESTBED_VERSION
-  ${CMAKETESTBED_MAJOR_VERSION}.${CMAKETESTBED_MINOR_VERSION}.${CMAKETESTBED_PATCH_VERSION})
+  ${CMAKETESTBED_VERSION_MAJOR}.${CMAKETESTBED_VERSION_MINOR}.${CMAKETESTBED_VERSION_PATCH})
+
+ 
+# specify the C++ standard
+add_library(testbed_compiler_flags INTERFACE)
+target_compile_features(testbed_compiler_flags INTERFACE cxx_std_11)
 
 
-# Setup basic install PATHs for lib, bin, include and CMake
-set(INSTALL_LIB_DIR lib CACHE PATH "Installation directory for libraries")
-set(INSTALL_BIN_DIR bin CACHE PATH "Installation directory for executables")
-set(INSTALL_INCLUDE_DIR include CACHE PATH
-  "Installation directory for header files")
+option(BUILD_SHARED_LIBS "Build using shared libraries" OFF)
 
-# Make relative install paths absolute (needed later on)
-foreach(p LIB BIN INCLUDE CMAKE)
-  set(var INSTALL_${p}_DIR)
-  if(NOT IS_ABSOLUTE "${${var}}")
-    set(${var} "${CMAKE_INSTALL_PREFIX}/${${var}}")
-  endif()
-endforeach()
+# add compiler warning flags just when building this project via
+# the BUILD_INTERFACE genex
+set(gcc_like_cxx "$<COMPILE_LANG_AND_ID:CXX,ARMClang,AppleClang,Clang,GNU,LCC>")
+set(msvc_cxx "$<COMPILE_LANG_AND_ID:CXX,MSVC>")
+target_compile_options(testbed_compiler_flags INTERFACE
+  "$<${gcc_like_cxx}:$<BUILD_INTERFACE:-Wall;-Wextra;-Wshadow;-Wformat=2;-Wunused>>"
+  "$<${msvc_cxx}:$<BUILD_INTERFACE:-W3>>"
+)
 
-set(PROJECT_SOURCE_DIR ${PROJECT_SOURCE_DIR}/source)
-# set up include-directories
-include_directories(
-  "${PROJECT_SOURCE_DIR}"
-  "${PROJECT_BINARY_DIR}")
+# control where the static and shared libraries are built so that on windows
+# we don't need to tinker with the path to run the executable
+set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY "${PROJECT_BINARY_DIR}")
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${PROJECT_BINARY_DIR}")
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${PROJECT_BINARY_DIR}")
 
 enable_testing()
-# Targets that we develop here
+
+configure_file(cmake/cmake_test_bed_version.h.in ${PROJECT_BINARY_DIR}/cmake_test_bed_version.h)
+
 add_subdirectory(source)
 
+# install version file
+#install(TARGETS cmake_test_bed DESTINATION bin)
+#install(FILES "${PROJECT_BINARY_DIR}/cmake_test_bed_version.h"
+#  DESTINATION include
+#  )
 
-
-export(PACKAGE CMakeTestBed)
-
-# Create the FooBarConfig.cmake and FooBarConfigVersion files
-file(RELATIVE_PATH REL_INCLUDE_DIR "${CMAKE_INSTALL_PREFIX}"
-   "${INSTALL_INCLUDE_DIR}")
-# ... for the build tree
-set(CONF_INCLUDE_DIRS "${PROJECT_SOURCE_DIR}" "${PROJECT_BINARY_DIR}")
-configure_file(CMakeTestBedConfig.cmake.in
-  "${PROJECT_BINARY_DIR}/CMakeTestBedConfig.cmake" @ONLY)
-# ... for the install tree
-set(CONF_INCLUDE_DIRS "\${CMAKETESTBED_CMAKE_DIR}/${REL_INCLUDE_DIR}")
-configure_file(CMakeTestBedConfig.cmake.in
-  "${PROJECT_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeTestBedConfig.cmake" @ONLY)
-# ... for both
-configure_file(CMakeTestBedConfigVersion.cmake.in
-  "${PROJECT_BINARY_DIR}/CMakeTestBedVersion.cmake" @ONLY)
-
-# Install the FooBarConfig.cmake and FooBarConfigVersion.cmake
-install(FILES
-  "${PROJECT_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeTestBedConfig.cmake"
-  "${PROJECT_BINARY_DIR}/CMakeTestBedVersion.cmake"
-  DESTINATION "${INSTALL_CMAKE_DIR}" COMPONENT dev)
-
-# Install the export set for use with the install-tree
-install(EXPORT CMakeTestBedTargets DESTINATION
-  "${CMAKE_INSTALL_PREFIX}" COMPONENT dev)
+# 
+install(EXPORT state_machine_targets
+  FILE state_machine_targets.cmake
+  DESTINATION lib/cmake/state_machine
+)
