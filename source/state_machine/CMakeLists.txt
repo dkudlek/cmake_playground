@@ -12,14 +12,36 @@ if(${BUILD_SHARED_LIBS})
   target_compile_definitions(state_machine PRIVATE "EXPORTING_STATE_MACHINE")
   target_compile_definitions(state_machine PRIVATE "BUILD_SHARED")
 endif()
+set_target_properties(state_machine PROPERTIES PUBLIC_HEADER "${HEADER_FILES}")
 
-get_target_property(MAIN_CFLAGS state_machine COMPILE_DEFINITIONS)
-message("-- Target compiler flags are: ${MAIN_CFLAGS}")
 
 install(
   TARGETS state_machine testbed_compiler_flags
   EXPORT state_machine_targets
   DESTINATION lib)
 install(FILES state_machine.h DESTINATION include)
+
+include(CMakePackageConfigHelpers)
+
+# generate the config file that includes the exports
+configure_package_config_file(${CMAKE_CURRENT_SOURCE_DIR}/cmake/state_machine-config.cmake
+  "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}__state_machine-config.cmake"
+  INSTALL_DESTINATION "lib/cmake"
+  NO_SET_AND_CHECK_MACRO
+  NO_CHECK_REQUIRED_COMPONENTS_MACRO
+  )
+
+install(FILES
+  ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}__state_machine-config.cmake
+  DESTINATION cmake
+  )
+
+install(EXPORT state_machine_targets
+  FILE ${PROJECT_NAME}__state_machine.cmake
+  NAMESPACE ${PROJECT_NAME}:: 
+  DESTINATION cmake
+  )
+
+
 
 add_subdirectory(tests)

@@ -35,15 +35,3 @@ enable_testing()
 configure_file(cmake/cmake_test_bed_version.h.in ${PROJECT_BINARY_DIR}/cmake_test_bed_version.h)
 
 add_subdirectory(source)
-
-# install version file
-#install(TARGETS cmake_test_bed DESTINATION bin)
-#install(FILES "${PROJECT_BINARY_DIR}/cmake_test_bed_version.h"
-#  DESTINATION include
-#  )
-
-# 
-install(EXPORT state_machine_targets
-  FILE state_machine_targets.cmake
-  DESTINATION lib/cmake/state_machine
-)
