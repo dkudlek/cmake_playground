@@ -11,6 +11,9 @@ target_include_directories(
   tool_app PUBLIC "${PROJECT_BINARY_DIR}" ${state_machine_SOURCE_DIR}
 )
 
+add_test(NAME tool_app
+         COMMAND tool_app)
+
 install(TARGETS tool_app DESTINATION bin)
 install(FILES "${PROJECT_BINARY_DIR}/cmake_test_bed_version.h"
   DESTINATION include
