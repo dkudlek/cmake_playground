@@ -7,8 +7,8 @@ target_include_directories(
   state_machine_test PUBLIC "${PROJECT_BINARY_DIR}" ${state_machine_SOURCE_DIR}
 )
 gtest_add_tests(TARGET state_machine_test
-                TEST_SUFFIX .noArgs
-                TEST_LIST   noArgsTests
+  TEST_SUFFIX .noArgs
+  TEST_LIST noArgsTests
 )
 
 set_tests_properties(${noArgsTests} PROPERTIES TIMEOUT 10)

@@ -7,11 +7,9 @@ set(CMAKETESTBED_VERSION_PATCH 0)
 set(CMAKETESTBED_VERSION
   ${CMAKETESTBED_VERSION_MAJOR}.${CMAKETESTBED_VERSION_MINOR}.${CMAKETESTBED_VERSION_PATCH})
 
- 
 # specify the C++ standard
 add_library(testbed_compiler_flags INTERFACE)
 target_compile_features(testbed_compiler_flags INTERFACE cxx_std_11)
-
 
 option(BUILD_SHARED_LIBS "Build using shared libraries" OFF)
 
@@ -35,3 +33,7 @@ enable_testing()
 configure_file(cmake/cmake_test_bed_version.h.in ${PROJECT_BINARY_DIR}/cmake_test_bed_version.h)
 
 add_subdirectory(source)
+
+install(FILES "${PROJECT_BINARY_DIR}/cmake_test_bed_version.h"
+  DESTINATION include
+)
